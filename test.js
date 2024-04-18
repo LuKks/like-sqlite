@@ -1,3 +1,4 @@
+const fs = require('fs')
 const path = require('path')
 const test = require('brittle')
 const tmp = require('test-tmp')
@@ -401,8 +402,13 @@ test.skip('query', async function (t) {
 // TODO: Missing array of queries/executes for automatic "transactions"
 
 async function create (t, opts = {}) {
-  const dir = await tmp(t)
+  const dir = await tmp()
   const db = new SQLite(path.join(dir, 'database.db'))
+
+  t.teardown(async () => {
+    await db.end()
+    await fs.promises.rm(dir, { recursive: true })
+  })
 
   return db
 }
