@@ -1,6 +1,8 @@
 const SQL = require('like-sql')
 const SQLite = require('better-sqlite3')
 
+const builder = new SQL()
+
 module.exports = class LikeSQLite extends SQL {
   constructor (file, opts = {}) {
     super()
@@ -71,6 +73,16 @@ module.exports = class LikeSQLite extends SQL {
     return info.changes
   }
 
+  async * iterate (...args) {
+    const [sql, values] = builder.select(...args)
+    const stmt = this.db.prepare(sql)
+
+    for (const row of stmt.iterate(values)) {
+      yield row
+      await waitForTick(noop)
+    }
+  }
+
   // TODO: `execute` and `query` are not compatible with other libs atm
 
   async execute (sql, values) {
@@ -134,3 +146,5 @@ class SQLError extends Error {
     return 'SQLError'
   }
 }
+
+function noop () {}
