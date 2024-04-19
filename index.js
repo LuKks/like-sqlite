@@ -38,29 +38,25 @@ module.exports = class LikeSQLite extends SQL {
   }
 
   async _select (sql, values) {
-    const stmt = this.db.prepare(sql)
-    const rows = stmt.all(...values)
+    const [rows] = await this.query(sql, values)
     return rows
   }
 
   async _selectOne (sql, values) {
-    const stmt = this.db.prepare(sql)
-    const row = stmt.get(...values)
-    return row
+    const [rows] = await this.query(sql, values, { fields: false })
+    return rows[0]
   }
 
   async _exists (sql, values) {
-    const stmt = this.db.prepare(sql)
-    const row = stmt.get(...values)
+    const [rows] = await this.query(sql, values, { fields: false })
     // TODO: Unsafe? Could use .columns() `name`
-    return !!Object.values(row)[0]
+    return !!Object.values(rows[0])[0]
   }
 
   async _count (sql, values) {
-    const stmt = this.db.prepare(sql)
-    const row = stmt.get(...values)
+    const [rows] = await this.query(sql, values, { fields: false })
     // TODO: Unsafe? Could use .columns() `name`
-    return Object.values(row)[0]
+    return Object.values(rows[0])[0]
   }
 
   async _update (sql, values) {
@@ -78,33 +74,54 @@ module.exports = class LikeSQLite extends SQL {
   // TODO: `execute` and `query` are not compatible with other libs atm
 
   async execute (sql, values) {
-    try {
-      const stmt = this.db.prepare(sql)
-      const info = values ? stmt.run(...values) : stmt.run()
-      // TODO: Don't return info for v1
-      return info
-    } catch (err) {
-      if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-        throw new SQLError(err.message, 'ER_DUP_ENTRY')
-      }
+    return waitForTick(() => {
+      try {
+        const stmt = this.db.prepare(sql)
+        const info = values ? stmt.run(...values) : stmt.run()
+        // TODO: Don't return info for v1
+        return info
+      } catch (err) {
+        if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+          throw new SQLError(err.message, 'ER_DUP_ENTRY')
+        }
 
-      throw err
-    }
+        throw err
+      }
+    })
   }
 
-  async query (sql, values) {
-    const stmt = this.db.prepare(sql)
+  async query (sql, values, opts) {
+    return waitForTick(() => {
+      const stmt = this.db.prepare(sql)
 
-    const rows = values ? stmt.all(...values) : stmt.all()
-    const fields = stmt.columns().map(col => ({ name: col.name }))
+      const rows = values ? stmt.all(...values) : stmt.all()
+      const fields = !opts || opts.fields !== false ? stmt.columns().map(mapColumns) : null
 
-    return [rows, fields]
+      return [rows, fields]
+    })
   }
 
   // TODO: We should name it `close` everywhere
   async end () {
     this.db.close()
   }
+}
+
+// better-sqlite3 is sync so we need to unlock the event loop to allow timers, fs, etc
+function waitForTick (cb) {
+  return new Promise((resolve, reject) => {
+    setImmediate(() => {
+      try {
+        resolve(cb())
+      } catch (err) {
+        reject(err)
+      }
+    })
+  })
+}
+
+function mapColumns (column) {
+  return { name: column.name }
 }
 
 class SQLError extends Error {
