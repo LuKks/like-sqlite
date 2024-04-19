@@ -1,6 +1,6 @@
 {
   "name": "like-sqlite",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "SQLite wrapper for Node.js",
   "main": "index.js",
   "scripts": {
