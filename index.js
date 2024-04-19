@@ -15,7 +15,23 @@ module.exports = class LikeSQLite extends SQL {
     this.engine = null
     this.connection = { connection: { config: { database: 'main' } } }
 
-    this.db = new SQLite(file, opts)
+    this.db = new SQLite(file, {
+      readonly: opts.readonly || false,
+      fileMustExist: opts.fileMustExist || false,
+      timeout: typeof opts.timeout === 'number' ? opts.timeout : 5000,
+      verbose: opts.verbose || null,
+      nativeBinding: opts.nativeBinding || null
+    })
+
+    if (opts.journal) this.db.pragma('journal_mode = ' + opts.journal)
+  }
+
+  pragma (cmd) {
+    return this.db.pragma(cmd)
+  }
+
+  async exec (sql) {
+    return waitForTick(() => this.db.exec(sql))
   }
 
   async _createDatabase (sql) {
