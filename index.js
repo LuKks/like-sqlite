@@ -24,6 +24,9 @@ module.exports = class LikeSQLite extends SQL {
     })
 
     if (opts.journal) this.db.pragma('journal_mode = ' + opts.journal)
+    if (opts.sync) this.db.pragma('synchronous = ' + opts.sync)
+
+    this.db.pragma('busy_timeout = ' + (typeof opts.busy === 'number' ? opts.busy : 60000))
   }
 
   pragma (cmd) {
