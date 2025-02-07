@@ -44,6 +44,33 @@ const [res, fields] = await db.execute('INSERT INTO `ips` (`addr`) VALUES (?)', 
 const [rows, fields] = await db.query('SELECT * FROM `ips` WHERE `addr` = ?', [req.ip])
 ```
 
+## API
+
+#### `db = new SQLite(filename[, options])`
+
+Create a SQLite instance.
+
+Options:
+
+```js
+{
+  readonly: false,
+  fileMustExist: false,
+  timeout: 5000,
+  verbose: null,
+  nativeBinding: null,
+  journal: null, // 'WAL' is a good journal_mode!
+  sync: null,
+  busy: 60000
+}
+```
+
+For example:
+
+```js
+const db = new SQLite('./database.db', { journal: 'WAL' })
+```
+
 ## License
 
 MIT
