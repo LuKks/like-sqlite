@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "SQLite wrapper for Node.js",
   "main": "index.js",
+  "files": [],
   "scripts": {
     "test": "standard && brittle test.js"
   },
@@ -10,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/lukks/like-sqlite.git"
   },
-  "author": "1337",
+  "author": "Lucas Barrena (LuKks)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/lukks/like-sqlite/issues"
