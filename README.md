@@ -37,11 +37,11 @@ await db.update('ips', [{ hits: 'hits + ?' }, 1], 'addr = ?', req.ip)
 // DELETE FROM `ips` WHERE addr = ?
 await db.delete('ips', 'addr = ?', req.ip)
 
-// execute
-const [res, fields] = await db.execute('SELECT * FROM `ips` WHERE `addr` = ?', [req.ip])
+// Execute (INSERT, UPDATE, etc)
+const [res, fields] = await db.execute('INSERT INTO `ips` (`addr`) VALUES (?)', [req.ip])
 
-// query
-const [rows, fields] = await db.query('SELECT * FROM `ips` WHERE `addr` = "8.8.8.8"')
+// Query (SELECT, etc)
+const [rows, fields] = await db.query('SELECT * FROM `ips` WHERE `addr` = ?', [req.ip])
 ```
 
 ## License
