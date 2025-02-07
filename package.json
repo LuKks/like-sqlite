@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/like/like-sqlite.git"
+    "url": "git+https://github.com/lukks/like-sqlite.git"
   },
   "author": "1337",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/like/like-sqlite/issues"
+    "url": "https://github.com/lukks/like-sqlite/issues"
   },
-  "homepage": "https://github.com/like/like-sqlite#readme",
+  "homepage": "https://github.com/lukks/like-sqlite#readme",
   "devDependencies": {
     "brittle": "^3.4.0",
     "standard": "^17.1.0",
