@@ -352,7 +352,7 @@ test.skip('transaction', async function (t) {})
 test.skip('transaction() with error', async function (t) {})
 
 test('execute', async function (t) {
-  t.plan(3)
+  t.plan(1)
 
   const db = await create(t)
 
@@ -368,15 +368,13 @@ test('execute', async function (t) {
   await db.insert('users13', { username: 'joe' })
   await db.insert('users13', { username: 'bob' })
 
-  // TODO: Combine this query with the 'query' test, and here it should be an execute!
-  const [rows, fields] = await db.query('SELECT * FROM `users13` WHERE `username` = ?', ['joe'])
-  t.alike(rows, [{ id: 1, username: 'joe' }])
-  t.is(fields[0].name, 'id')
-  t.is(fields[1].name, 'username')
+  const insert = await db.execute('INSERT INTO `users13` (`username`) VALUES (?)', ['joe'])
+
+  t.alike(insert, { changes: 1, lastInsertRowid: 3 })
 })
 
-test.skip('query', async function (t) {
-  t.plan(3)
+test('query', async function (t) {
+  t.plan(5)
 
   const db = await create(t)
 
@@ -392,11 +390,14 @@ test.skip('query', async function (t) {
   await db.insert('users14', { username: 'joe' })
   await db.insert('users14', { username: 'bob' })
 
-  // TODO: Errors with `no such column: joe`
-  const [rows, fields] = await db.query('SELECT * FROM `users14` WHERE `username` = "joe"')
+  const [rows, fields] = await db.query('SELECT * FROM `users14` WHERE `username` = ?', ['joe'])
   t.alike(rows, [{ id: 1, username: 'joe' }])
   t.is(fields[0].name, 'id')
   t.is(fields[1].name, 'username')
+
+  const [rows2, fields2] = await db.query('SELECT * FROM `users14` WHERE `username` = \'joe\'')
+  t.alike(rows, rows2)
+  t.alike(fields, fields2)
 })
 
 // TODO: Missing array of queries/executes for automatic "transactions"
